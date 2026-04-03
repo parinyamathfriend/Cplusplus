@@ -15,10 +15,27 @@ void fast_io() {
 
 // Logic for processing a single testcase
 void solve() {
-    // Example: Reading input and printing
-    // string s;
-    // cin >> s;
-    // cout << "You entered: " << s << "\n";
+    // 1. Read how many numbers to expect
+    cout << "Enter the number of elements: ";
+    int n;
+    cin >> n;
+
+    cout << "Enter " << n << " numbers separated by spaces: ";
+    
+    // 2. Create the vector to hold exactly 'n' elements
+    vector<long long> numbers(n);
+    
+    // 3. Loop to fill the vector from terminal input
+    for (int i = 0; i < n; ++i) {
+        cin >> numbers[i];
+    }
+
+    // 4. Print the vector back out to prove we captured it
+    cout << "\nYou entered the following vector:\n[ ";
+    for (int i = 0; i < n; ++i) {
+        cout << numbers[i] << " ";
+    }
+    cout << "]\n\n";
 }
 
 int main() {
