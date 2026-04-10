@@ -10,6 +10,15 @@ struct RayProperties {
   int end_point;
   int direction; // 0 is down, 1 is up
 };
+void print_ray(RayProperties input) {
+  cout << "start: " << input.start_point << " end: " << input.end_point
+       << " direction: ";
+  if (input.direction == 0) {
+    cout << "down" << endl;
+  } else {
+    cout << "up" << endl;
+  }
+};
 class RayObject {
 private:
   // We can store our ray data inside the class.
@@ -19,11 +28,13 @@ private:
 
 public:
   void SetRayData(vector<int> input_data) { ray_data = input_data; }
-
+  int current_query_slot = 0;
+  RayProperties get_current_query_ray() { return get_ray(current_query_slot); }
   // Method to get a ray by its index
   // This returns the entire struct containing start, end, and direction
   RayProperties get_ray(int index) {
     // Add a safety check to avoid segmentation faults!
+
     if (index < 0 || index >= rays.size() - 1) {
       cout << "Error: Index out of bounds!" << endl;
       // Return some default/empty ray if out of bounds
@@ -39,14 +50,14 @@ public:
         temp.end_point = ray_data[index];
         temp.direction = index % 2;
       }
-      cout << "Ray " << index << " -> ";
-      cout << "start_point " << temp.start_point << " end_point "
-           << temp.end_point;
-      (temp.direction % 2 == 0) ? cout << " down" : cout << " up";
-      cout << endl;
       return temp;
     }
   }
+  // RayProperties get_ray_in_range(int start, int end) {
+  //   RayProperties current_selected=get_ray(current_query_slot);
+  //   RayProperties temp{0, 0, 0};
+  //   return temp;
+  // }
   int countRayElement() { return ray_data.size() - 1; }
 
   // Method to print info for debugging
@@ -120,6 +131,26 @@ void get_input() {
   ray2_object.SetRayData(ray_2);
 }
 
+bool cross_ray_check(RayProperties to_check, RayProperties main_ray) {
+  bool cross_ray = false;
+  if (to_check.direction == main_ray.direction) {
+    // case1:
+    if (to_check.start_point < main_ray.start_point &&
+        main_ray.end_point < to_check.end_point) {
+      cross_ray = true;
+    } else if (to_check.start_point > main_ray.start_point &&
+               to_check.end_point < main_ray.end_point) {
+      cross_ray = true;
+    } else if (to_check.end_point == main_ray.end_point) {
+      cross_ray = true;
+    }
+  } else {
+    if (to_check.end_point > main_ray.start_point) {
+      cross_ray = true;
+    }
+  }
+  return cross_ray;
+}
 // 2. Create the class to manage your rays
 
 int main() {
@@ -129,12 +160,35 @@ int main() {
   get_input();
   // ray1_object is main
   // ray2_object is for_count_crossing_poin
+  cout << endl;
+  cout << "Process begins" << endl;
+  cout << endl;
 
-  int current_ray_index = 0;
+  int cross_count = 1; // start at the same poin, also count as crossing
+
   for (int i = 0; i <= ray2_object.countRayElement(); i++) {
-    cout << "current_ray_index " << current_ray_index << endl;
-    ray2_object.get_ray(current_ray_index);
-    current_ray_index++;
+    cout << "loop: " << (i + 1) << endl;
+    RayProperties ray_to_check = ray2_object.get_ray(i);
+    RayProperties current_main_ray;
+    cout << "ray to check: ";
+    print_ray(ray_to_check);
+    cout << "Here are slot to compare";
+    cout << endl;
+    do {
+      current_main_ray = ray1_object.get_current_query_ray();
+      print_ray(current_main_ray);
+      if (cross_ray_check(ray_to_check, current_main_ray)) {
+        cross_count++;
+        cout << "cross_count: " << cross_count << endl;
+      }
+      if (ray_to_check.end_point >= current_main_ray.end_point) {
+        ray1_object.current_query_slot++;
+      }
+    } while (ray_to_check.end_point > current_main_ray.end_point &&
+             ray1_object.current_query_slot <= ray1_object.countRayElement());
+
+    cout << "****************" << endl;
   }
+  cout << "total cross_count: " << cross_count << endl;
   return 0;
 }
